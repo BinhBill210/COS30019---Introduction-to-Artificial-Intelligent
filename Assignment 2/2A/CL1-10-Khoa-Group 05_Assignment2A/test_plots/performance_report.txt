@@ -1,0 +1,38 @@
+=== ALGORITHM PERFORMANCE REPORT ===
+
+Test Suite: 12 files (test1, test10, test11, test12, test2, test3, test4, test5, test6, test7, test8, test9)
+
+Success Rates:
+  DFS: 10/12 (83.3%)
+  BFS: 10/12 (83.3%)
+  GBFS: 10/12 (83.3%)
+  AS: 10/12 (83.3%)
+  CUS1: 10/12 (83.3%)
+  CUS2: 10/12 (83.3%)
+
+Performance Metrics (Average on Successful Runs):
+Algorithm  Avg Nodes    Avg Length   Avg Cost     Avg Time (ms)  
+=================================================================
+DFS        11.10        5.20         13.40        1013.36        
+BFS        6.90         3.30         8.70         950.77         
+GBFS       5.80         3.30         8.70         961.53         
+AS         7.20         3.60         7.70         945.58         
+CUS1       23.30        3.30         8.70         955.96         
+CUS2       6.10         3.40         8.10         948.16         
+
+Overall Average Execution Time (All Runs):
+Algorithm  Avg Time (ms)  
+==========================
+DFS        844.465        
+BFS        792.393        
+GBFS       801.399        
+AS         788.063        
+CUS1       796.714        
+CUS2       790.215        
+
+=== BEST PERFORMERS (AVERAGE ON SUCCESS) ===
+Lowest Avg Nodes:    GBFS (5.80)
+Lowest Avg Length:   BFS, GBFS, CUS1 (3.30)
+Lowest Avg Cost:     AS (7.70)
+Lowest Avg Time (Success): AS (945.58 ms)
+Lowest Avg Time (All Runs):  AS (788.06 ms)
