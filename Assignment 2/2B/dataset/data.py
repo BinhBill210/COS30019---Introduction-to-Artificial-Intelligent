@@ -1,142 +1,169 @@
 """
-Processing the data
+Data processing module for SCATS traffic data analysis.
+This module provides functions for processing and preparing SCATS traffic data for analysis.
 """
-#import networkx as nx
-import matplotlib.pyplot as plt
+
+import math
 import numpy as np
 import pandas as pd
-import math
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import MinMaxScaler
+from typing import Tuple, List, Union, Optional
 
 
-
-def get_coords(data, scats, junction):
-    # Read data file
-    df = pd.read_csv('dataset/Scats_Data_October_2006.csv', encoding='utf-8').fillna(0)
-
-    # Filter the DataFrame around the SCATS, making a new DataFrame that just has this SCAT
-    filtered_df = df[df['SCATS Number'] == int(scats)]
-
-    # Remove duplicates if there are any
-    filtered_df = filtered_df.drop_duplicates(subset=['NB_LATITUDE', 'NB_LONGITUDE'])
-    filtered_df = filtered_df.reset_index()
-    i = 0
-    lat = 0
-    long = 0
-    #Calculate the aprx centre of all the junctions. This has flaws and isn't perfect for say, a 90 degree turn
-    while ((i + 1) < len(filtered_df)):
-        lat = lat + float(filtered_df.loc[i,'NB_LATITUDE'])
-        long = long + float(filtered_df.loc[i,'NB_LONGITUDE'])
-        i += 1
-    lat = lat/i
-    long = long/i
-    safeIndex = -1
-    i = 0
-    #Calculate the direction the exit to a junction is
-    while ((i + 1) < len(filtered_df)):
-        tempa = float(filtered_df.loc[i,'NB_LATITUDE']) - lat
-        tempo = float(filtered_df.loc[i,'NB_LONGITUDE']) - long
-        if ( abs(tempa) > abs(tempo)):
-            angle = math.degrees(math.atan(tempo/tempa))
-            if (tempa > 0):
-                if (angle > 22):
-                    if (tempo > 0):
-                        if (junction == "NE"):
-                            safeIndex = i
-                    else:
-                        if (junction == "NW"):
-                            safeIndex = i
-                else:
-                    if (junction == "N"):
-                        safeIndex = i
-            else:
-                if (angle > 22):
-                    if (tempo > 0):
-                        if (junction == "SE"):
-                            safeIndex = i
-                    else:
-                        if (junction == "SW"):
-                            safeIndex = i
-                else:
-                    if (junction == "S"):
-                        safeIndex = i
-        else:
-            angle = math.degrees(math.atan(tempa/tempo))
-            if (tempo > 0):
-                if (angle > 22):
-                    if (tempa > 0):
-                        if (junction == "NE"):
-                            safeIndex = i
-                    else:
-                        if (junction == "SE"):
-                            safeIndex = i
-                else:
-                    if (junction == "E"):
-                        safeIndex = i
-            else:
-                if (angle > 22):
-                    if (tempa > 0):
-                        if (junction == "NW"):
-                            safeIndex = i
-                    else:
-                        if (junction == "SW"):
-                            safeIndex = i
-                else:
-                    if (junction == "E"):
-                        safeIndex = i
-        i += 1
-
-    if (safeIndex != -1):
-        return filtered_df.loc[safeIndex,'NB_LATITUDE'], filtered_df.loc[safeIndex,'NB_LONGITUDE']
-    else:
+def get_coords(data: str, scats: str, junction: str) -> Tuple[float, float]:
+    """
+    Calculate the coordinates for a specific SCATS junction.
+    
+    Args:
+        data (str): Path to the SCATS data CSV file
+        scats (str): SCATS number to filter by
+        junction (str): Junction direction (N, S, E, W, NE, NW, SE, SW)
+    
+    Returns:
+        Tuple[float, float]: Latitude and longitude of the junction, or (-1, -1) if not found
+    """
+    # Read and filter data
+    df = pd.read_csv(data, encoding='utf-8').fillna(0)
+    filtered_df = df[df['SCATS Number'] == int(scats)].drop_duplicates(
+        subset=['NB_LATITUDE', 'NB_LONGITUDE']
+    ).reset_index()
+    
+    if len(filtered_df) == 0:
         return -1, -1
+    
+    # Calculate center point
+    lat = filtered_df['NB_LATITUDE'].mean()
+    long = filtered_df['NB_LONGITUDE'].mean()
+    
+    # Find the closest point matching the junction direction
+    for idx, row in filtered_df.iterrows():
+        lat_diff = float(row['NB_LATITUDE']) - lat
+        long_diff = float(row['NB_LONGITUDE']) - long
+        
+        # Calculate angle and determine direction
+        if abs(lat_diff) > abs(long_diff):
+            angle = math.degrees(math.atan(long_diff/lat_diff))
+            if lat_diff > 0:
+                if angle > 22:
+                    if long_diff > 0 and junction == "NE":
+                        return row['NB_LATITUDE'], row['NB_LONGITUDE']
+                    elif long_diff < 0 and junction == "NW":
+                        return row['NB_LATITUDE'], row['NB_LONGITUDE']
+                elif junction == "N":
+                    return row['NB_LATITUDE'], row['NB_LONGITUDE']
+            else:
+                if angle > 22:
+                    if long_diff > 0 and junction == "SE":
+                        return row['NB_LATITUDE'], row['NB_LONGITUDE']
+                    elif long_diff < 0 and junction == "SW":
+                        return row['NB_LATITUDE'], row['NB_LONGITUDE']
+                elif junction == "S":
+                    return row['NB_LATITUDE'], row['NB_LONGITUDE']
+        else:
+            angle = math.degrees(math.atan(lat_diff/long_diff))
+            if long_diff > 0:
+                if angle > 22:
+                    if lat_diff > 0 and junction == "NE":
+                        return row['NB_LATITUDE'], row['NB_LONGITUDE']
+                    elif lat_diff < 0 and junction == "SE":
+                        return row['NB_LATITUDE'], row['NB_LONGITUDE']
+                elif junction == "E":
+                    return row['NB_LATITUDE'], row['NB_LONGITUDE']
+            else:
+                if angle > 22:
+                    if lat_diff > 0 and junction == "NW":
+                        return row['NB_LATITUDE'], row['NB_LONGITUDE']
+                    elif lat_diff < 0 and junction == "SW":
+                        return row['NB_LATITUDE'], row['NB_LONGITUDE']
+                elif junction == "W":
+                    return row['NB_LATITUDE'], row['NB_LONGITUDE']
+    
+    return -1, -1
 
-def process_data(data, lags, train_ratio=0.75):
+
+def process_data(
+    data_path: str,
+    lags: int,
+    train_ratio: float = 0.75
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, MinMaxScaler, np.ndarray, np.ndarray]:
     """
-    Process time series data from CSV file, split into train/test sets in time order, normalize and create series with delay.
-    Returns: x_train, y_train, x_test, y_test, scaler, time_train, time_test
+    Process time series data from CSV file, split into train/test sets, normalize and create series with delay.
+    
+    Args:
+        data_path (str): Path to the SCATS data CSV file
+        lags (int): Number of time steps to use as input features
+        train_ratio (float): Ratio of data to use for training (default: 0.75)
+    
+    Returns:
+        Tuple containing:
+        - x_train: Training input features
+        - y_train: Training target values
+        - x_test: Test input features
+        - y_test: Test target values
+        - scaler: Fitted MinMaxScaler for inverse transformation
+        - time_train: Training timestamps
+        - time_test: Test timestamps
     """
-    # Read in CSV file
-    df = pd.read_csv('dataset/Scats_Data_October_2006.csv', encoding='utf-8',header=1).fillna(0) 
-    #Reshapes the DataFrames to only take values from V00 to V95
-    scaler = MinMaxScaler(feature_range=(0, 1)).fit(df.loc[:, 'V00':'V95'].values.reshape(-1, 1))
-    flow = scaler.transform(df.loc[:, 'V00':'V95'].values.reshape(-1, 1)).reshape(1, -1)[0]
-
-    # Get the time column
-    if 'Date' in df.columns:
-        time_col = df['Date'].values
-    else:
-        time_col = np.arange(len(flow)) 
-
+    # Read and preprocess data
+    df = pd.read_csv(data_path, encoding='utf-8', header=1).fillna(0)
+    
+    # Extract flow data and reshape for normalization
+    flow_data = df.loc[:, 'V00':'V95'].values
+    flow_data_reshaped = flow_data.reshape(-1, 1)
+    
+    # Normalize the data
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    flow_normalized = scaler.fit_transform(flow_data_reshaped)
+    
+    # Get timestamps
+    time_col = df['Date'].values if 'Date' in df.columns else np.arange(len(flow_normalized))
+    
     # Create time series with delay
     X, y, time_arr = [], [], []
-    n = min(len(flow), len(time_col))
+    n = min(len(flow_normalized), len(time_col))
+    
     for i in range(lags, n):
-        X.append(flow[i - lags: i])
-        y.append(flow[i])
+        X.append(flow_normalized[i - lags:i])
+        y.append(flow_normalized[i])
         time_arr.append(time_col[i])
+    
+    # Convert to numpy arrays and reshape for LSTM input
     X = np.array(X)
     y = np.array(y)
     time_arr = np.array(time_arr)
-
-    # Split train/test in the ratio of 75% first for train, 25% last for test
+    
+    # Reshape X to (samples, time steps, features)
+    X = X.reshape(X.shape[0], X.shape[1], 1)
+    
+    # Split into train/test sets
     train_size = int(len(X) * train_ratio)
     x_train, y_train = X[:train_size], y[:train_size]
     x_test, y_test = X[train_size:], y[train_size:]
     time_train, time_test = time_arr[:train_size], time_arr[train_size:]
-
+    
     return x_train, y_train, x_test, y_test, scaler, time_train, time_test
 
+
 if __name__ == "__main__":
-    x_train, y_train, x_test, y_test, scaler, time_train, time_test = process_data('Scats_Data_October_2006.csv', lags=12, train_ratio=0.75)
-    print("X_train shape:", x_train.shape)
-    print("Y_train shape:", y_train.shape)
-    print("X_test shape:", x_test.shape)
-    print("Y_test shape:", y_test.shape)
-    print("Time_train shape:", time_train.shape)
-    print("Time_test shape:", time_test.shape)
-    print("\nSample X_train:", x_train[:2])
-    print("Sample Y_train:", y_train[:2])
-    print("Sample time_train:", time_train[:2])
-    print("Sample time_test:", time_test[:2])
+    # Example usage
+    data_path = "2B/dataset/Scats_Data_October_2006.csv"
+    x_train, y_train, x_test, y_test, scaler, time_train, time_test = process_data(
+        data_path, lags=12, train_ratio=0.75
+    )
+    
+    # Print shapes and samples
+    print("Data Shapes:")
+    print(f"X_train: {x_train.shape}")
+    print(f"Y_train: {y_train.shape}")
+    print(f"X_test: {x_test.shape}")
+    print(f"Y_test: {y_test.shape}")
+    print(f"Time_train: {time_train.shape}")
+    print(f"Time_test: {time_test.shape}")
+    
+    print("\nSample Data:")
+    print(f"X_train sample:\n{x_train[:2]}")
+    print(f"Y_train sample:\n{y_train[:2]}")
+    print(f"Time_train sample:\n{time_train[:2]}")
+    print(f"Time_test sample:\n{time_test[:2]}")
+    print(f"X_test sample:\n{x_test[:2]}")
+    print(f"Y_test sample:\n{y_test[:2]}")
