@@ -10,7 +10,10 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import math
 import time
+import sys
+sys.path.append('dataset')
 from data import process_data
+
 # Set random seeds for reproducibility
 np.random.seed(42)
 tf.random.set_seed(42)
@@ -185,7 +188,7 @@ def compare_models(metrics_dict):
 def main():
     """Main function to run the TBRGS system."""
     # Configuration parameters
-    file_path = '2B/dataset/Scats_Data_October_2006.csv'
+    file_path = 'dataset/Scats_Data_October_2006.csv'
     lags = 12  # Number of time steps to use as features
     train_ratio = 0.75
     epochs = 50

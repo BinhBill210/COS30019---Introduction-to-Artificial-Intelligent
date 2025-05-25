@@ -146,7 +146,7 @@ def process_data(
 
 if __name__ == "__main__":
     # Example usage
-    data_path = "2B/dataset/Scats_Data_October_2006.csv"
+    data_path = "dataset/Scats_Data_October_2006.csv"
     x_train, y_train, x_test, y_test, scaler, time_train, time_test = process_data(
         data_path, lags=12, train_ratio=0.75
     )

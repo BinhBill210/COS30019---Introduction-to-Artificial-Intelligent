@@ -1,0 +1,42 @@
+# Boroondara Road Network Map
+# Format: Node1 Node2 Distance X1 Y1 X2 Y2
+# Where Distance is in kilometers and X,Y are map coordinates
+
+# North-West region
+NW1 NW2 1.2 10 90 30 90
+NW2 NW3 0.8 30 90 50 90
+NW2 CW1 1.5 30 90 30 70
+NW3 NE1 1.3 50 90 70 90
+NW3 CW2 1.0 50 90 50 70
+
+# North-East region
+NE1 NE2 0.9 70 90 90 90
+NE2 CE2 1.2 90 90 90 70
+NE1 CE1 1.1 70 90 70 70
+
+# Central-West region
+CW1 CW2 1.4 30 70 50 70
+CW1 SW1 1.0 30 70 30 50
+CW2 CE1 1.6 50 70 70 70
+CW2 SW2 1.2 50 70 50 50
+
+# Central-East region
+CE1 CE2 1.3 70 70 90 70
+CE1 SE1 1.5 70 70 70 50
+CE2 SE2 1.1 90 70 90 50
+
+# South-West region
+SW1 SW2 0.9 30 50 50 50
+SW1 SW3 1.0 30 50 30 30
+SW2 SE1 1.2 50 50 70 50
+SW2 SW4 1.1 50 50 50 30
+SW3 SW4 0.8 30 30 50 30
+SW4 SE3 1.5 50 30 70 30
+
+# South-East region
+SE1 SE2 1.4 70 50 90 50
+SE1 SE3 1.3 70 50 70 30
+SE2 SE4 1.0 90 50 90 30
+SE3 SE4 1.2 70 30 90 30
+SE3 SE9 2.0 70 30 70 10
+SE4 SE9 1.8 90 30 70 10
