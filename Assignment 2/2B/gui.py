@@ -27,7 +27,7 @@ st.set_page_config(
 # Add paths for importing modules
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
-sys.path.append(os.path.join(parent_dir, 'dataset'))
+sys.path.append(os.path.join(parent_dir, '2B/dataset'))
 sys.path.append(os.path.join(parent_dir, '2B/model'))
 
 # Import our modules
@@ -76,7 +76,8 @@ def save_config(config):
 @st.cache_resource
 def load_models():
     models = {}
-    model_dir = os.path.join(parent_dir, '2B' 'models')
+    # Change this line to use the models directory inside 2B instead of at the Assignment 2 level
+    model_dir = os.path.join(parent_dir, '2B', 'models')
     
     # Check if model directory exists
     if not os.path.exists(model_dir):
