@@ -165,7 +165,7 @@ class DFS(SearchAlgorithm):
                     self.nodes_created += 1
                     
                     if self.graph.is_goal(child.state):
-                        return child
+                        return 
                     
                     stack.append(child)
         
